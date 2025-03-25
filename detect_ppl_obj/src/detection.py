@@ -407,5 +407,5 @@ class MiroClient:
 
 # This condition fires when the script is called directly
 if __name__ == "__main__":
-    main = MiRoClient()  # Instantiate class
+    main = MiroClient()  # Instantiate class
     main.loop()  # Run the main control loop
