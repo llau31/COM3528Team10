@@ -24,7 +24,7 @@
   />
 
   <!--A helper script the moves the ball in Gazebo-->
-  <node name="find_obj" pkg="detect_ppl_obj" type="find_obj.py" />
+  <node name="test_move" pkg="COM3528Team10" type="test_movement.py" />
 
   <!-- Start Gazebo client -->
   <node name="gazebo_gui"
