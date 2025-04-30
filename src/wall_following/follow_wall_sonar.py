@@ -94,7 +94,7 @@ class FollowWallSonar():
             if self.front_range > 0.12:
                 #print("Not near wall")
                 self.move = TwistStamped()
-                self.move.twist.linear.x = 0.1
+                #self.move.twist.linear.x = 0.1
             else:
                 print("Near wall")
                 self.move = TwistStamped()
