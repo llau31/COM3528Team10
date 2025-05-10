@@ -12,13 +12,13 @@ import tf
 
 class FollowWallSonar():
 
+    # uses sonar to detect objects in front of nose
     def sonar_callback(self, sonar_data: Range):
         self.front_range = sonar_data.range
         current_time = time.time()
         if current_time - self.start_time_2 > 1.8:
             print(f"sonar reading: {self.front_range} m")
             self.start_time_2 = current_time
-
 
     def imu_callback(self, imu_data: Imu):
         x = imu_data.orientation.x
@@ -34,9 +34,35 @@ class FollowWallSonar():
 
         
     def joints_callback(self, joints_data: JointState):
-        pass
-
-
+        # JointState includes name, position, velocity and effort
+        current_time = time.time()
+        #if current_time - self.start_time_3 > 1.8:
+            # tilt, lift, yaw, pitch
+            # print(joints_data.name)
+            # print(joints_data.position)
+            # print(joints_data.velocity)
+            # print(joints_data.effort)
+            # self.start_time_3 = current_time
+        current_time = time.time()
+        temp_joint_state = JointState()
+        original_positions = list(joints_data.position)
+        positions = [0.0, 0.0, 0.0, 0.0]
+        new_positions = [(-0.698, 0), (-0.698, -0.262), (0.698, -0.262), (0.698, 0)]
+        positions[0] = original_positions[0]
+        positions[1] = original_positions[1]
+        positions[2] = original_positions[2]
+        # positions[2] = 0.698 * math.sin(0.5 * current_time)
+        # positions[2] = 0.698 * math.cos(0.5 * current_time)
+        # positions[3] = original_positions[3]
+        # positions[3] = 0.698 * math.sin(0.5 * current_time)
+        positions[3] = 0.698 * math.cos(0.5 * current_time)
+        print(positions)
+        print("positions")
+        temp_joint_state.position = positions
+        temp_joint_state.name = ["tilt", "lift", "yaw", "pitch"]
+        temp_joint_state.velocity = ()
+        temp_joint_state.effort = ()
+        self.move_head_pub.publish(temp_joint_state)
 
 
     def __init__(self):
@@ -44,7 +70,7 @@ class FollowWallSonar():
         rospy.init_node(node_name, anonymous=True)
 
         self.pub = rospy.Publisher("/miro/control/cmd_vel", TwistStamped, queue_size=10)
-        self.move_head_pub = rospy.Publisher("/miro/sensors/kinematic_joints", JointState, queue_size=10)
+        self.move_head_pub = rospy.Publisher("/miro/control/kinematic_joints", JointState, queue_size=10)
         self.head_move_sub = rospy.Subscriber('/miro/sensors/kinematic_joints', JointState, self.joints_callback)
         self.sonar = rospy.Subscriber('/miro/sensors/sonar', Range, self.sonar_callback)
         self.imu = rospy.Subscriber('/miro/sensors/imu_body', Imu, self.imu_callback)
@@ -55,10 +81,7 @@ class FollowWallSonar():
         self.front_range = 0.0 
         self.start_time = time.time()
         self.start_time_2 = time.time()
-
-        self.tilt_up = JointState()
-        self.tilt_up.effort = [0.1]
-        self.move_head_pub.publish(self.tilt_up)
+        self.start_time_3 = time.time()
         
         self.rate = rospy.Rate(10)
 
@@ -88,13 +111,10 @@ class FollowWallSonar():
 
     def main(self):
         while not rospy.is_shutdown() and not self.ctrl_c:
-
-
-            self.move_head_pub.publish(self.tilt_up)
             if self.front_range > 0.12:
                 #print("Not near wall")
                 self.move = TwistStamped()
-                #self.move.twist.linear.x = 0.1
+                self.move.twist.linear.x = 0.1
             else:
                 print("Near wall")
                 self.move = TwistStamped()
