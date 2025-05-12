@@ -88,12 +88,6 @@ class FollowWallSonar():
         node_name = "follow_wall_sonar"
         rospy.init_node(node_name, anonymous=True)
 
-        self.pub = rospy.Publisher("/miro/control/cmd_vel", TwistStamped, queue_size=10)
-        self.move_head_pub = rospy.Publisher("/miro/control/kinematic_joints", JointState, queue_size=10)
-        self.head_move_sub = rospy.Subscriber('/miro/sensors/kinematic_joints', JointState, self.joints_callback)
-        self.sonar = rospy.Subscriber('/miro/sensors/sonar', Range, self.sonar_callback)
-        self.imu = rospy.Subscriber('/miro/sensors/imu_body', Imu, self.imu_callback)
-        
         self.move = TwistStamped()
         self.move.twist.linear.x = 0.0
         self.move.twist.angular.z = 0.0
@@ -113,6 +107,12 @@ class FollowWallSonar():
         self.printed = False
         
         self.is_break = False
+
+        self.pub = rospy.Publisher("/miro/control/cmd_vel", TwistStamped, queue_size=10)
+        self.move_head_pub = rospy.Publisher("/miro/control/kinematic_joints", JointState, queue_size=10)
+        self.head_move_sub = rospy.Subscriber('/miro/sensors/kinematic_joints', JointState, self.joints_callback)
+        self.sonar = rospy.Subscriber('/miro/sensors/sonar', Range, self.sonar_callback)
+        self.imu = rospy.Subscriber('/miro/sensors/imu_body', Imu, self.imu_callback)
         
         self.rate = rospy.Rate(10)
 
