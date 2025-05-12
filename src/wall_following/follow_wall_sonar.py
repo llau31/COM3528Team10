@@ -28,7 +28,7 @@ class FollowWallSonar():
         (roll, pitch, yaw) = tf.transformations.euler_from_quaternion([x, y, z, w])
 
         current_time = time.time()
-        if current_time - self.start_time > 1.8:
+        if current_time - self.start_time > 2:
             #print(f"Degrees: {math.degrees(yaw)}")
             self.start_time = current_time
 
@@ -36,7 +36,7 @@ class FollowWallSonar():
     def joints_callback(self, joints_data: JointState):
         # JointState includes name, position, velocity and effort
         current_time = time.time()
-        #if current_time - self.start_time_3 > 1.8:
+        #if current_time - self.start_time_3 > 2:
             # tilt, lift, yaw, pitch
             # print(joints_data.name)
             # print(joints_data.position)
@@ -48,21 +48,43 @@ class FollowWallSonar():
         original_positions = list(joints_data.position)
         positions = [0.0, 0.0, 0.0, 0.0]
         new_positions = [(-0.698, 0), (-0.698, -0.262), (0.698, -0.262), (0.698, 0)]
-        positions[0] = original_positions[0]
-        positions[1] = original_positions[1]
-        positions[2] = original_positions[2]
+        # positions[0] = original_positions[0]
+        # positions[1] = original_positions[1]
+        # positions[2] = original_positions[2]
         # positions[2] = 0.698 * math.sin(0.5 * current_time)
         # positions[2] = 0.698 * math.cos(0.5 * current_time)
         # positions[3] = original_positions[3]
         # positions[3] = 0.698 * math.sin(0.5 * current_time)
-        positions[3] = 0.698 * math.cos(0.5 * current_time)
-        print(positions)
-        print("positions")
+        # positions[3] = 0.698 * math.cos(0.5 * current_time)
+        self.step = 0
+        # print(current_time)
+        # print("current_time")
+        # print(self.start_time_3)
+        # print("self.start_time_3")
+        # print(current_time - self.start_time_3 > 2)
+        if current_time - self.start_time_3 > 3:
+            positions[0] = original_positions[0]
+            positions[1] = original_positions[1]
+            positions[2] = new_positions[self.step][self.step]
+            positions[2] = 0.698 * math.cos(0.5 * current_time)
+            self.step = (self.step + 1) % 4
+            self.start_time_3 = current_time
+            print("Working")
+            print(positions)
+            print("positions")  
         temp_joint_state.position = positions
         temp_joint_state.name = ["tilt", "lift", "yaw", "pitch"]
         temp_joint_state.velocity = ()
         temp_joint_state.effort = ()
         self.move_head_pub.publish(temp_joint_state)
+        self.move = TwistStamped()
+        self.move.twist.angular.x = 0.0
+        self.move.twist.angular.y = 0.0
+        self.move.twist.angular.z = 0.0
+        self.move.twist.linear.x = 0.0
+        self.move.twist.linear.y = 0.0
+        self.move.twist.linear.z = 0.0
+        self.pub.publish(self.move)
 
 
     def __init__(self):
@@ -82,6 +104,14 @@ class FollowWallSonar():
         self.start_time = time.time()
         self.start_time_2 = time.time()
         self.start_time_3 = time.time()
+
+        temp_joint_state = JointState()
+        temp_joint_state.name = ["tilt", "lift", "yaw", "pitch"]
+        temp_joint_state.position = [0.0, 0.0, 0.0, 0.0]
+        temp_joint_state.velocity = ()
+        temp_joint_state.effort = ()
+        self.move_head_pub.publish(temp_joint_state)
+        
         
         self.rate = rospy.Rate(10)
 
@@ -111,16 +141,16 @@ class FollowWallSonar():
 
     def main(self):
         while not rospy.is_shutdown() and not self.ctrl_c:
-            if self.front_range > 0.12:
-                #print("Not near wall")
-                self.move = TwistStamped()
-                self.move.twist.linear.x = 0.1
-            else:
-                print("Near wall")
-                self.move = TwistStamped()
-                self.move.twist.linear.x = 0.0
-                self.turn(90)
-            self.pub.publish(self.move)
+            # if self.front_range > 0.12:
+            #     #print("Not near wall")
+            #     self.move = TwistStamped()
+            #     self.move.twist.linear.x = 0.1
+            # else:
+            #     print("Near wall")
+            #     self.move = TwistStamped()
+            #     self.move.twist.linear.x = 0.0
+            #     self.turn(90)
+            # self.pub.publish(self.move)
 
             self.rate.sleep()
 
