@@ -36,42 +36,28 @@ class FollowWallSonar():
     def joints_callback(self, joints_data: JointState):
         # JointState includes name, position, velocity and effort
         current_time = time.time()
-        #if current_time - self.start_time_3 > 2:
-            # tilt, lift, yaw, pitch
-            # print(joints_data.name)
-            # print(joints_data.position)
-            # print(joints_data.velocity)
-            # print(joints_data.effort)
-            # self.start_time_3 = current_time
-        current_time = time.time()
         temp_joint_state = JointState()
         original_positions = list(joints_data.position)
         positions = [0.0, 0.0, 0.0, 0.0]
         new_positions = [(-0.698, 0), (-0.698, -0.262), (0.698, -0.262), (0.698, 0)]
-        # positions[0] = original_positions[0]
-        # positions[1] = original_positions[1]
-        # positions[2] = original_positions[2]
-        # positions[2] = 0.698 * math.sin(0.5 * current_time)
-        # positions[2] = 0.698 * math.cos(0.5 * current_time)
-        # positions[3] = original_positions[3]
-        # positions[3] = 0.698 * math.sin(0.5 * current_time)
-        # positions[3] = 0.698 * math.cos(0.5 * current_time)
-        self.step = 0
-        # print(current_time)
-        # print("current_time")
-        # print(self.start_time_3)
-        # print("self.start_time_3")
-        # print(current_time - self.start_time_3 > 2)
-        if current_time - self.start_time_3 > 3:
-            positions[0] = original_positions[0]
-            positions[1] = original_positions[1]
-            positions[2] = new_positions[self.step][self.step]
-            positions[2] = 0.698 * math.cos(0.5 * current_time)
-            self.step = (self.step + 1) % 4
-            self.start_time_3 = current_time
-            print("Working")
-            print(positions)
-            print("positions")  
+        positions[0] = original_positions[0]
+        positions[1] = original_positions[1]
+        positions[2] = 0.698 * math.cos(0.5 * current_time)
+        positions[3] = 0.698 * math.sin(0.5 * current_time)
+
+        if 0.58 < math.sin(0.5 * current_time) and math.sin(0.5 * current_time) < 0.62 and -0.82 < math.cos(0.5 * current_time) and math.cos(0.5 * current_time) < -0.78:
+            print("BOTTOM LEFT")
+        if 0.94 < math.sin(0.5 * current_time) and math.sin(0.5 * current_time) < 1 and -0.16 < math.cos(0.5 * current_time) and math.cos(0.5 * current_time) < -0.13:
+            print("BOTTOM MIDDLE")
+        if 0.49 < math.sin(0.5 * current_time) and math.sin(0.5 * current_time) < 0.55 and 0.81 < math.cos(0.5 * current_time) and math.cos(0.5 * current_time) < 0.85:
+            print("BOTTOM RIGHT")
+        if -0.05 < math.sin(0.5 * current_time) and math.sin(0.5 * current_time) < 0.05 and -1 < math.cos(0.5 * current_time) and math.cos(0.5 * current_time) < -0.98:
+            print("TOP LEFT")
+        if -1 < math.sin(0.5 * current_time) and math.sin(0.5 * current_time) < -0.93 and -0.05 < math.cos(0.5 * current_time) and math.cos(0.5 * current_time) < 0.05:
+            print("TOP MIDDLE")
+        if -0.05 < math.sin(0.5 * current_time) and math.sin(0.5 * current_time) < 0.05 and 0.98 < math.cos(0.5 * current_time) and math.cos(0.5 * current_time) < 1:
+            print("TOP RIGHT")
+        
         temp_joint_state.position = positions
         temp_joint_state.name = ["tilt", "lift", "yaw", "pitch"]
         temp_joint_state.velocity = ()
@@ -85,6 +71,7 @@ class FollowWallSonar():
         self.move.twist.linear.y = 0.0
         self.move.twist.linear.z = 0.0
         self.pub.publish(self.move)
+        # rospy.sleep(0.5)
 
 
     def __init__(self):
@@ -112,6 +99,7 @@ class FollowWallSonar():
         temp_joint_state.effort = ()
         self.move_head_pub.publish(temp_joint_state)
         
+        self.is_break = False
         
         self.rate = rospy.Rate(10)
 
@@ -153,6 +141,8 @@ class FollowWallSonar():
             # self.pub.publish(self.move)
 
             self.rate.sleep()
+            if self.is_break:
+                break
 
 if __name__ == "__main__":
     node = FollowWallSonar()
