@@ -20,8 +20,15 @@ class LevyWalk:
 
     def state_callback(self, msg: Int32):
         data = msg.data
-        # print(f'State data: {data}')
+
+        if data == -1:
+            rospy.signal_shutdown('State controller was terminated. Shutting down...')
+
         self.is_active = data == 0
+
+    def shutdownhook(self): 
+        print(f"Stopping the '{self.node_name}' node at: {rospy.get_time()}")
+        self.ctrl_c = True
 
     def __init__(self):
         # Initialise node on network
@@ -44,6 +51,8 @@ class LevyWalk:
         self.rate = rospy.Rate(self.LOOP_HZ)
         self.first_loop = True
         self.is_active = False
+        self.ctrl_c = False
+        rospy.on_shutdown(self.shutdownhook) 
 
         # Turning
         self.turn_angle = 0
@@ -114,7 +123,7 @@ class LevyWalk:
 
     def control_turning(self):
         """
-        Checks if miro is currently turning.
+        Controls whether miro is turning or not.
         """
         
         t = rospy.Time.now()
@@ -128,16 +137,26 @@ class LevyWalk:
         return
 
     def start_turn(self):
+        """
+        Initiate turning.
+        """
+
         rospy.sleep(1)
+
         self.turn_angle = self.von_mises_angle()
         self.turn_duration = abs(self.turn_angle) / self.ANGULAR_SPEED
         self.end_turn = rospy.Time.now() + rospy.Duration(self.turn_duration)
+
         rospy.loginfo(f"↪️ Turning {math.degrees(self.turn_angle):.1f}°")
         self.is_turning = True
 
     def start_move(self):
+        """
+        Initiate moving.
+        """
+
         rospy.sleep(1)
-        # Calculate distance and duration
+
         self.distance = self.levy_step()
         self.move_duration = self.distance / self.LINEAR_SPEED
         self.end_move = rospy.Time.now() + rospy.Duration(self.move_duration)
@@ -150,7 +169,7 @@ class LevyWalk:
         Main loop for integration.
         """
 
-        while not rospy.is_shutdown():
+        while not self.ctrl_c:
 
             # Only run if state controller allows it
             if self.is_active:

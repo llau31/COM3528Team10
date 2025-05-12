@@ -15,7 +15,7 @@ import miro2 as miro
 class StateController:
     """
     This class controls the state of MIRO by broadcasting state changes
-    to a topic.
+    to topic /get_state
     """
 
     TICK = 0.02
@@ -42,10 +42,13 @@ class StateController:
 
         # Set up attributes
         self.just_switched = True
-        self.state = 0 # States: 0=roaming, 1=wall following, 2=user following
+        self.state = 0 # States: -1=terminate, 0=roaming, 1=wall following, 2=user following
 
     def shutdownhook(self): 
         print(f"Stopping the '{self.node_name}' node at: {rospy.get_time()}")
+
+        # Terminate all nodes
+        self.pub.publish(-1)
         self.ctrl_c = True
 
     def loop(self):
