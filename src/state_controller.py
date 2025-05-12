@@ -7,8 +7,8 @@ from sensor_msgs.msg import Range
 from geometry_msgs.msg import TwistStamped
 from std_msgs.msg import Int32
 
-from roaming.random_walk import run_random_walk
-from roaming.levy_walk import run_levy_walk
+# from roaming.random_walk import run_random_walk
+# from roaming.levy_walk import run_levy_walk
 
 import miro2 as miro
 
@@ -27,7 +27,7 @@ class StateController:
 
         # Initialise node
         self.node_name = 'state_controller'
-        topic_name = 'team10'
+        topic_name = 'get_state'
 
         # Publish to network
         self.pub = rospy.Publisher(topic_name, Int32, queue_size=10)
@@ -52,10 +52,9 @@ class StateController:
         """
         Main control loop
         """
-        counter = 0
+
         while not self.ctrl_c:
-            self.pub.publish(counter)
-            counter += 1
+            self.pub.publish(self.state)
             rospy.sleep(self.TICK)
 
         # print("Starting up...")
