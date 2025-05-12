@@ -101,7 +101,7 @@ class FollowWallSonar():
         temp_joint_state.position = [0.0, 0.0, 0.0, 0.0]
         temp_joint_state.velocity = ()
         temp_joint_state.effort = ()
-        self.move_head_pub.publish(temp_joint_state)
+        
         self.region = ""
         self.prev_region = ""
         self.printed = False
@@ -113,6 +113,8 @@ class FollowWallSonar():
         self.head_move_sub = rospy.Subscriber('/miro/sensors/kinematic_joints', JointState, self.joints_callback)
         self.sonar = rospy.Subscriber('/miro/sensors/sonar', Range, self.sonar_callback)
         self.imu = rospy.Subscriber('/miro/sensors/imu_body', Imu, self.imu_callback)
+
+        self.move_head_pub.publish(temp_joint_state)
         
         self.rate = rospy.Rate(10)
 
