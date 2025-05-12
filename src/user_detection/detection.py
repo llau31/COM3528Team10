@@ -114,6 +114,8 @@ class MiroClient:
             size = w * h
             face_sizes.append(size)
         largest_face = faces[np.argmax(face_sizes)]
+        if largest_face is not None:
+            self.pub_face.publish(True)
         return largest_face # returns x, y, w, h of largest detected face
 
     def look_for_face(self):
@@ -271,6 +273,11 @@ class MiroClient:
         self.pub_facer = rospy.Publisher(
             topic_base_name + 'core/detect_objects_r',
             miro.msg.objects,
+            queue_size=0
+        )
+        self.pub_face = rospy.Publisher(
+            '/found_face',
+            bool,
             queue_size=0
         )
 
