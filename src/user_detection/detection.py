@@ -107,7 +107,7 @@ class MiroClient:
         self.new_frame[index] = False
         img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-        faces = self.cascade.detectMultiScale(img, scaleFactor=1.1, minNeighbours=3, minSize=(20, 20))
+        faces = self.cascade.detectMultiScale(img, scaleFactor=1.1, minNeighbors=3, minSize=(20, 20))
         
         face_sizes = []
         for (_, _, w, h) in faces:
