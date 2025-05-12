@@ -1,0 +1,6 @@
+<launch>
+  <node pkg="team10" type="state_controller.py" name="state_controller" output="screen">
+  </node>
+  <node pkg="team10" type="levy_walk.py" name="levy_walk" output="screen">
+  </node>
+</launch>
