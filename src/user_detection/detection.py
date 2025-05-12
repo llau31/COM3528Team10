@@ -51,6 +51,12 @@ class MiroClient:
 
         self.vel_pub.publish(msg_cmd_vel)
     
+    def callback_state(self, msg):
+        data = msg.data
+        if data == -1:
+            rospy.signal_shutdown('State controller was terminated. Shutting down...')
+        self.is_active = data == 0
+
     def callback_caml(self, ros_image):  # Left camera
         self.callback_cam(ros_image, 0)
 
@@ -211,7 +217,14 @@ class MiroClient:
         # Individual robot name acts as ROS topic prefix
         topic_base_name = "/" + os.getenv("MIRO_ROBOT_NAME")
        
-        # Create two new subscribers to receive camera images with attached callbacks
+       # Create subscriber to detect if code state is active
+        self.sub_state = rospy.Subscriber(
+           '/get_state',
+            int,
+            self.callback_state
+        )
+
+        # Create new subscribers to receive camera images and detect faces
         self.sub_caml = rospy.Subscriber(
             topic_base_name + "/sensors/caml/compressed",
             CompressedImage,
@@ -291,27 +304,30 @@ class MiroClient:
         self.status_code = 0
         while not rospy.core.is_shutdown():
 
-            # Step 1. Find face
-            if self.status_code == 1:
-                # Every once in a while, look for a face
-                if self.counter % self.CAM_FREQ == 0:
-                    self.look_for_face()
+            # Only run if state controller allows it
+            if self.is_active:
 
-            # Step 2. Orient towards it
-            elif self.status_code == 2:
-                self.lock_onto_face()
+                # Step 1. Find face
+                if self.status_code == 1:
+                    # Every once in a while, look for a face
+                    if self.counter % self.CAM_FREQ == 0:
+                        self.look_for_face()
 
-            # Step 3. Follow (move towards)
-            elif self.status_code == 3:
-                self.follow()
+                # Step 2. Orient towards it
+                elif self.status_code == 2:
+                    self.lock_onto_face()
 
-            # Fall back
-            else:
-                self.status_code = 1
+                # Step 3. Follow (move towards)
+                elif self.status_code == 3:
+                    self.follow()
 
-            # Yield
-            self.counter += 1
-            rospy.sleep(self.TICK)
+                # Fall back
+                else:
+                    self.status_code = 1
+
+                # Yield
+                self.counter += 1
+                rospy.sleep(self.TICK)
 
 
 # This condition fires when the script is called directly
