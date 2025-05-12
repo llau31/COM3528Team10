@@ -23,6 +23,9 @@ class StateController:
     # def callback_sensor(self, msg: Range):
     #     print(f'Distance: {msg.range} meters')
 
+    def callback_face(self, msg: bool):
+        self.face_detected = msg
+
     def __init__(self):
 
         # Initialise node
@@ -34,6 +37,9 @@ class StateController:
         rospy.init_node("state_controller", anonymous=True)
         rospy.sleep(2.0)
 
+        # Subscribers
+        self.sub_face = rospy.Subscriber('/found_face', bool, queue_size=0)
+
         # Shutdown
         self.ctrl_c = False 
         rospy.on_shutdown(self.shutdownhook) 
@@ -41,8 +47,9 @@ class StateController:
         rospy.loginfo(f"The '{self.node_name}' node is active...") 
 
         # Set up attributes
-        self.just_switched = True
         self.state = 0 # States: -1=terminate, 0=roaming, 1=wall following, 2=user following
+        self.face_detected = False
+        self.wall_detected = False
 
     def shutdownhook(self): 
         print(f"Stopping the '{self.node_name}' node at: {rospy.get_time()}")
@@ -57,41 +64,18 @@ class StateController:
         """
 
         while not self.ctrl_c:
+
+            if self.face_detected:
+                self.state = 2
+
+            elif self.wall_detected:
+                self.state = 1
+
+            else:
+                self.state = 0
+
             self.pub.publish(self.state)
             rospy.sleep(self.TICK)
-
-        # print("Starting up...")
-
-        # counter = 0
-
-        # while not rospy.core.is_shutdown():
-
-        #     if counter > 3:
-        #         self.state = 1
-        #         if not self.just_switched:
-        #             self.just_switched = True
-
-        #     if self.state == 0:
-        #         if self.just_switched:
-        #             print("Starting levy walk...")
-        #             self.just_switched = False
-        #         run_levy_walk(self.pub)
-
-        #     elif self.state == 1:
-        #         if self.just_switched:
-        #             print("Starting random walk...")
-        #             self.just_switched = False
-        #         run_random_walk(self.random_pub)
-
-        #     elif self.state == 2:
-        #         print("User following...")
-
-        #     else:
-        #         print("Unknown action!")
-            
-        #     print(counter)
-        #     counter += 1
-        #     rospy.sleep(self.TICK)
 
 if __name__ == "__main__":
     client = StateController()
