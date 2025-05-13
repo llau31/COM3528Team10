@@ -107,7 +107,7 @@ class MiroClient:
         self.new_frame[index] = False
         img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-        faces = self.cascade.detectMultiScale(img, scaleFactor=1.1, minNeighbours=3, minSize=(20, 20))
+        faces = self.cascade.detectMultiScale(img, scaleFactor=1.1, minNeighbors=3)
         
         face_sizes = []
         for (_, _, w, h) in faces:
@@ -214,7 +214,7 @@ class MiroClient:
         # Initialise CV Bridge
         self.image_converter = CvBridge()
         # Initialise cascade classifiers
-        self.cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
+        self.cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
        
         # Individual robot name acts as ROS topic prefix
         topic_base_name = "/" + os.getenv("MIRO_ROBOT_NAME")
