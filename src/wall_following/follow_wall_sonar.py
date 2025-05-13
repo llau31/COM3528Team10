@@ -18,6 +18,41 @@ class FollowWallSonar():
             self.front_range = sonar_data.range
             print(f"sonar reading: {self.front_range} m")
             self.printed = True
+        if self.region == "TOP RIGHT":
+            print("TOP RIGHT 2")
+            if self.front_range < 0.272:
+                self.move = TwistStamped()
+                self.move.twist.angular.z = -0.05
+                self.pub.publish(self.move)
+                print("less than")
+            elif self.front_range > 0.277:
+                self.move = TwistStamped()
+                self.move.twist.angular.z = 0.05
+                self.pub.publish(self.move)
+                print("more than")
+            else:
+                self.move = TwistStamped()
+                self.move.twist.angular.z = 0.0
+                self.pub.publish(self.move)
+                print("straight")
+        elif self.region == "BOTTOM RIGHT":
+            print("BOTTOM RIGHT 2")
+            if self.front_range < 0.101:
+                self.move = TwistStamped()
+                self.move.twist.angular.z = -0.05
+                self.pub.publish(self.move)
+                print("less than")
+            elif self.front_range > 0.114:
+                self.move = TwistStamped()
+                self.move.twist.angular.z = 0.05
+                self.pub.publish(self.move)
+                print("more than")
+            else:
+                self.move = TwistStamped()
+                self.move.twist.angular.z = 0.0
+                self.pub.publish(self.move)
+                print("straight")
+
 
     def imu_callback(self, imu_data: Imu):
         x = imu_data.orientation.x
@@ -38,11 +73,10 @@ class FollowWallSonar():
         temp_joint_state = JointState()
         original_positions = list(joints_data.position)
         positions = [0.0, 0.0, 0.0, 0.0]
-        new_positions = [(-0.698, 0), (-0.698, -0.262), (0.698, -0.262), (0.698, 0)]
         positions[0] = original_positions[0]
         positions[1] = original_positions[1]
-        positions[2] = 0.698 * math.cos(0.5 * current_time)
-        positions[3] = 0.698 * math.sin(0.5 * current_time)
+        positions[2] = 0.698 * math.cos(2.4 * current_time)
+        positions[3] = 0.698 * math.sin(2.4 * current_time)
 
         if 0.58 < math.sin(0.5 * current_time) and math.sin(0.5 * current_time) < 0.62 and -0.82 < math.cos(0.5 * current_time) and math.cos(0.5 * current_time) < -0.78:
             print("BOTTOM LEFT")
@@ -154,6 +188,10 @@ class FollowWallSonar():
             #     self.move.twist.linear.x = 0.0
             #     self.turn(90)
             # self.pub.publish(self.move)
+
+            self.move = TwistStamped()
+            self.move.twist.linear.x = 0.9
+            self.pub.publish(self.move)
 
             self.rate.sleep()
             if self.is_break:
