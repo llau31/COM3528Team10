@@ -14,44 +14,72 @@ class FollowWallSonar():
 
     # uses sonar to detect objects in front of nose
     def sonar_callback(self, sonar_data: Range):
+        current_time = time.time()
         if self.region != self.prev_region:
             self.front_range = sonar_data.range
-            print(f"sonar reading: {self.front_range} m")
+            if self.region == "BOTTOM RIGHT":
+                print(f"sonar reading: {self.front_range} m")
+            #print(f"region: {self.region}")
             self.printed = True
-        if self.region == "TOP RIGHT":
-            print("TOP RIGHT 2")
-            if self.front_range < 0.272:
+        # if self.region == "TOP RIGHT":
+        #     if current_time - self.start_time_3 > 2:
+        #         #print("TOP RIGHT 2")
+        #         self.start_time_3 = current_time
+        #     if self.front_range < 0.3:
+        #         self.move = TwistStamped()
+        #         self.move.twist.angular.z = 0.07
+        #         self.pub.publish(self.move)
+        #         if current_time - self.start_time_2 > 2:
+        #             print("away from wall")
+        #             self.start_time_2 = current_time
+        #     elif self.front_range > 0.4:
+        #         self.move = TwistStamped()
+        #         self.move.twist.angular.z = -0.07
+        #         self.pub.publish(self.move)
+        #         if current_time - self.start_time_2 > 2:
+        #             print("to wall")
+        #             self.start_time_2 = current_time
+        #     else:
+        #         self.move = TwistStamped()
+        #         self.move.twist.angular.z = 0
+        #         self.pub.publish(self.move)
+        #         if current_time - self.start_time_2 > 2:
+        #             print("straight")
+        #             self.start_time_2 = current_time
+        if self.region == "BOTTOM RIGHT":
+            if current_time - self.start_time_3 > 2:
+                #print("BOTTOM RIGHT 2")
+                self.start_time_3 = current_time
+            if self.front_range < 0.39:
                 self.move = TwistStamped()
-                self.move.twist.angular.z = -0.05
+                self.move.twist.angular.z = -0.25
                 self.pub.publish(self.move)
-                print("less than")
-            elif self.front_range > 0.277:
+                if current_time - self.start_time_2 > 2:
+                    print("away from wall")
+                    self.start_time_2 = current_time
+            elif self.front_range > 0.57:
                 self.move = TwistStamped()
-                self.move.twist.angular.z = 0.05
+                self.move.twist.angular.z = 0.25
                 self.pub.publish(self.move)
-                print("more than")
+                if current_time - self.start_time_2 > 2:
+                    print("to wall")
+                    self.start_time_2 = current_time
             else:
                 self.move = TwistStamped()
-                self.move.twist.angular.z = 0.0
+                self.move.twist.angular.z = 0
                 self.pub.publish(self.move)
-                print("straight")
-        elif self.region == "BOTTOM RIGHT":
-            print("BOTTOM RIGHT 2")
-            if self.front_range < 0.101:
+                if current_time - self.start_time_2 > 2:
+                    print("straight")
+                    self.start_time_2 = current_time
+        elif self.region == "TOP MIDDLE":
+            if current_time - self.start_time_3 > 2:
+                #print("TOP MIDDLE 2")
+                self.start_time_3 = current_time
+            if self.front_range < 0.35:
                 self.move = TwistStamped()
-                self.move.twist.angular.z = -0.05
+                self.move.twist.angular.z = 0
                 self.pub.publish(self.move)
-                print("less than")
-            elif self.front_range > 0.114:
-                self.move = TwistStamped()
-                self.move.twist.angular.z = 0.05
-                self.pub.publish(self.move)
-                print("more than")
-            else:
-                self.move = TwistStamped()
-                self.move.twist.angular.z = 0.0
-                self.pub.publish(self.move)
-                print("straight")
+                self.turn(-90)
 
 
     def imu_callback(self, imu_data: Imu):
@@ -78,23 +106,23 @@ class FollowWallSonar():
         positions[2] = 0.698 * math.cos(2.4 * current_time)
         positions[3] = 0.698 * math.sin(2.4 * current_time)
 
-        if 0.58 < math.sin(0.5 * current_time) and math.sin(0.5 * current_time) < 0.62 and -0.82 < math.cos(0.5 * current_time) and math.cos(0.5 * current_time) < -0.78:
-            print("BOTTOM LEFT")
+        if 0.58 < math.sin(2.4 * current_time) and math.sin(2.4 * current_time) < 0.62 and -0.82 < math.cos(2.4 * current_time) and math.cos(2.4 * current_time) < -0.78:
+            #print("BOTTOM LEFT")
             self.region = "BOTTOM LEFT"
-        if 0.94 < math.sin(0.5 * current_time) and math.sin(0.5 * current_time) < 1 and -0.16 < math.cos(0.5 * current_time) and math.cos(0.5 * current_time) < -0.13:
-            print("BOTTOM MIDDLE")
+        if 0.94 < math.sin(2.4 * current_time) and math.sin(2.4 * current_time) < 1 and -0.16 < math.cos(2.4 * current_time) and math.cos(2.4 * current_time) < -0.13:
+            #print("BOTTOM MIDDLE")
             self.region = "BOTTOM MIDDLE"
-        if 0.49 < math.sin(0.5 * current_time) and math.sin(0.5 * current_time) < 0.55 and 0.81 < math.cos(0.5 * current_time) and math.cos(0.5 * current_time) < 0.85:
-            print("BOTTOM RIGHT")
+        if 0.47 < math.sin(2.4 * current_time) and math.sin(2.4 * current_time) < 0.57 and 0.78 < math.cos(2.4 * current_time) and math.cos(2.4 * current_time) < 0.88:
+            #print("BOTTOM RIGHT")
             self.region = "BOTTOM RIGHT"
-        if -0.05 < math.sin(0.5 * current_time) and math.sin(0.5 * current_time) < 0.05 and -1 < math.cos(0.5 * current_time) and math.cos(0.5 * current_time) < -0.98:
-            print("TOP LEFT")
+        if -0.05 < math.sin(2.4 * current_time) and math.sin(2.4 * current_time) < 0.05 and -1 < math.cos(2.4 * current_time) and math.cos(2.4 * current_time) < -0.98:
+            #print("TOP LEFT")
             self.region = "TOP LEFT"
-        if -1 < math.sin(0.5 * current_time) and math.sin(0.5 * current_time) < -0.93 and -0.05 < math.cos(0.5 * current_time) and math.cos(0.5 * current_time) < 0.05:
-            print("TOP MIDDLE")
+        if -1 < math.sin(2.4 * current_time) and math.sin(2.4 * current_time) < -0.93 and -0.05 < math.cos(2.4 * current_time) and math.cos(2.4 * current_time) < 0.05:
+            #print("TOP MIDDLE")
             self.region = "TOP MIDDLE"
-        if -0.05 < math.sin(0.5 * current_time) and math.sin(0.5 * current_time) < 0.05 and 0.98 < math.cos(0.5 * current_time) and math.cos(0.5 * current_time) < 1:
-            print("TOP RIGHT")
+        if -0.05 < math.sin(2.4 * current_time) and math.sin(2.4 * current_time) < 0.05 and 0.98 < math.cos(2.4 * current_time) and math.cos(2.4 * current_time) < 1:
+            #print("TOP RIGHT")
             self.region = "TOP RIGHT"
 
         if self.region != self.prev_region and self.printed:
