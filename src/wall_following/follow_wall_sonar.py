@@ -98,7 +98,7 @@ class FollowWallSonar():
 
         temp_joint_state = JointState()
         temp_joint_state.name = ["tilt", "lift", "yaw", "pitch"]
-        temp_joint_state.position = [0.0, 0.0, 0.0, 0.0]
+        temp_joint_state.position = [0.0, 0.593412, 0.0, 0.0]
         temp_joint_state.velocity = ()
         temp_joint_state.effort = ()
         
