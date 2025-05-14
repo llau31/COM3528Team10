@@ -55,7 +55,7 @@ class MiroClient:
         data = msg.data
         if data == -1:
             rospy.signal_shutdown('State controller was terminated. Shutting down...')
-        self.is_active = data == 0
+        self.is_active = data == 2
 
     def callback_caml(self, ros_image):  # Left camera
         self.callback_cam(ros_image, 0)

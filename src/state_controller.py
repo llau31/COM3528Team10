@@ -23,8 +23,8 @@ class StateController:
     # def callback_sensor(self, msg: Range):
     #     print(f'Distance: {msg.range} meters')
 
-    def callback_face(self, msg: bool):
-        self.face_detected = msg
+    # def callback_face(self, msg: bool):
+    #     self.face_detected = msg
 
     def __init__(self):
 
@@ -38,7 +38,7 @@ class StateController:
         rospy.sleep(2.0)
 
         # Subscribers
-        self.sub_face = rospy.Subscriber('/found_face', bool, queue_size=0)
+        # self.sub_face = rospy.Subscriber('/found_face', bool, queue_size=0)
 
         # Shutdown
         self.ctrl_c = False 
