@@ -14,6 +14,7 @@ from sensor_msgs.msg import CompressedImage
 from sensor_msgs.msg import JointState
 from cv_bridge import CvBridge, CvBridgeError
 from geometry_msgs.msg import TwistStamped
+from std_msgs.msg import Int32, Bool
 
 import miro2 as miro
 from miro2.lib import wheel_speed2cmd_vel
@@ -222,7 +223,7 @@ class MiroClient:
        # Create subscriber to detect if code state is active
         self.sub_state = rospy.Subscriber(
            '/get_state',
-            int,
+            Int32,
             self.callback_state
         )
 
@@ -277,7 +278,7 @@ class MiroClient:
         )
         self.pub_face = rospy.Publisher(
             '/found_face',
-            bool,
+            Bool,
             queue_size=0
         )
 
