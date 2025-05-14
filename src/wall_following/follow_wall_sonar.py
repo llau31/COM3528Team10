@@ -17,7 +17,7 @@ class FollowWallSonar():
         current_time = time.time()
         if self.region != self.prev_region:
             self.front_range = sonar_data.range
-            if self.region == "BOTTOM RIGHT":
+            if self.region == "TOP MIDDLE":
                 print(f"sonar reading: {self.front_range} m")
             #print(f"region: {self.region}")
             self.printed = True
@@ -50,16 +50,16 @@ class FollowWallSonar():
             if current_time - self.start_time_3 > 2:
                 #print("BOTTOM RIGHT 2")
                 self.start_time_3 = current_time
-            if self.front_range < 0.39:
+            if self.front_range < 0.43:
                 self.move = TwistStamped()
-                self.move.twist.angular.z = -0.25
+                self.move.twist.angular.z = -0.75
                 self.pub.publish(self.move)
                 if current_time - self.start_time_2 > 2:
                     print("away from wall")
                     self.start_time_2 = current_time
-            elif self.front_range > 0.57:
+            elif self.front_range > 0.63:
                 self.move = TwistStamped()
-                self.move.twist.angular.z = 0.25
+                self.move.twist.angular.z = 0.75
                 self.pub.publish(self.move)
                 if current_time - self.start_time_2 > 2:
                     print("to wall")
@@ -75,11 +75,14 @@ class FollowWallSonar():
             if current_time - self.start_time_3 > 2:
                 #print("TOP MIDDLE 2")
                 self.start_time_3 = current_time
-            if self.front_range < 0.35:
+            if self.front_range < 0.55:
                 self.move = TwistStamped()
                 self.move.twist.angular.z = 0
+                self.to_move = False
+                print(self.move)
                 self.pub.publish(self.move)
                 self.turn(-90)
+                self.to_move = True
 
 
     def imu_callback(self, imu_data: Imu):
@@ -109,7 +112,7 @@ class FollowWallSonar():
         if 0.58 < math.sin(2.4 * current_time) and math.sin(2.4 * current_time) < 0.62 and -0.82 < math.cos(2.4 * current_time) and math.cos(2.4 * current_time) < -0.78:
             #print("BOTTOM LEFT")
             self.region = "BOTTOM LEFT"
-        if 0.94 < math.sin(2.4 * current_time) and math.sin(2.4 * current_time) < 1 and -0.16 < math.cos(2.4 * current_time) and math.cos(2.4 * current_time) < -0.13:
+        if 0.93 < math.sin(2.4 * current_time) and math.sin(2.4 * current_time) < 1 and -0.2 < math.cos(2.4 * current_time) and math.cos(2.4 * current_time) < -0.1:
             #print("BOTTOM MIDDLE")
             self.region = "BOTTOM MIDDLE"
         if 0.47 < math.sin(2.4 * current_time) and math.sin(2.4 * current_time) < 0.57 and 0.78 < math.cos(2.4 * current_time) and math.cos(2.4 * current_time) < 0.88:
@@ -169,6 +172,7 @@ class FollowWallSonar():
         self.printed = False
         
         self.is_break = False
+        self.to_move = True
 
         self.pub = rospy.Publisher("/miro/control/cmd_vel", TwistStamped, queue_size=10)
         self.move_head_pub = rospy.Publisher("/miro/control/kinematic_joints", JointState, queue_size=10)
@@ -189,16 +193,20 @@ class FollowWallSonar():
         self.ctrl_c = True
 
     def turn(self, angle):
-
-        angular_speed = 0.5
-        angle_rad = math.radians(angle)
-        turn_time = (angle_rad / angular_speed) * 2.3
+        if angle < 0:
+            angular_speed = -0.5
+        else:
+            angular_speed = 0.5
+        angle_rad = abs(math.radians(angle))
+        #turn_time = (angle_rad / angular_speed) * 2.3
+        turn_time = (angle_rad / abs(angular_speed)) * 2.3
+        print(f"turn_time = {turn_time}")
         start_time = time.time()
         while time.time() - start_time < turn_time and not self.ctrl_c and not rospy.is_shutdown():
             self.move = TwistStamped()
             self.move.twist.angular.z = angular_speed
             self.pub.publish(self.move)
-            self.rate.sleep()
+            #self.rate.sleep()
         self.move = TwistStamped()
         self.move.twist.angular.z = 0.0
         self.pub.publish(self.move)
@@ -218,7 +226,10 @@ class FollowWallSonar():
             # self.pub.publish(self.move)
 
             self.move = TwistStamped()
-            self.move.twist.linear.x = 0.9
+            if self.to_move:
+                self.move.twist.linear.x = 0.9
+            else:
+                self.move.twist.linear.x = 0.0
             self.pub.publish(self.move)
 
             self.rate.sleep()
