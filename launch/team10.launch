@@ -3,4 +3,6 @@
   </node>
   <node pkg="team10" type="levy_walk.py" name="levy_walk" output="screen">
   </node>
+  <node pkg="team10" type="follow_wall_sonar.py" name="wall_following" output="screen">
+  </node>
 </launch>
